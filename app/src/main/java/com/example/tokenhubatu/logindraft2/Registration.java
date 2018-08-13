@@ -65,9 +65,7 @@ public class Registration extends AppCompatActivity implements View.OnClickListe
         }
         progressDialog.setMessage("Registering User..");
         progressDialog.show();
-        mAuth.signInWithCredential(PhoneAuthCredential creden){
-            mAuth.signInWithCredential
-        }
+
     }
     public void onClick(View v){
         if(v == btnreg){
