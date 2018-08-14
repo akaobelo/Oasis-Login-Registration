@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "797496148373-m4cd5iu6g0j42qd04bccddpsms4d6v58.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tokenhubatu.logindraft2",
+            "certificate_hash": "c6fe502986ae788f18cfd09677256786030ce132"
+          }
+        },
+        {
           "client_id": "797496148373-9devqkliiqbj45paue13aig3l68gd2j0.apps.googleusercontent.com",
           "client_type": 3
         }
