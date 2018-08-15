@@ -34,7 +34,7 @@
         android:layout_marginTop="109dp"
         android:background="@color/color"
         android:fontFamily="sans-serif-light"
-        android:inputType="number"
+        android:inputType="phone"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         app:layout_constraintBottom_toTopOf="@+id/txtPassword"

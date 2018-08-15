@@ -28,10 +28,13 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -93,28 +96,67 @@ public class Registration extends AppCompatActivity implements View.OnClickListe
             return;
         }
         if (confirmPass.equals(Fpass)){
-                User user= new User(Pnumber,Fpass);
 
-            if (PhoneNumberUtils.isGlobalPhoneNumber(Pnumber)){
-
-                   progressDialog.setMessage("Registering User..");
-                   progressDialog.show();
+                if (Pnumber.length()  == 13){
+                    Log.d("number checking",getAreaPhoneCode(Pnumber));
+                        if (getAreaPhoneCode(Pnumber).equals("+639")){
 
 
-                   dbRef.push().setValue(user, new DatabaseReference.CompletionListener(){
 
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        progressDialog.dismiss();
-                        messageBox("User Registered");
-//                        Intent i= new Intent(this,LoginDraft2.class    );
-                        Intent intent = new Intent(Registration.this,LoginDraft2.class);
-                        startActivity(intent);
-                    }
-                });
-            }else{
-                etPhone.setError("Invalid Phone Number");
-            }
+                            User user= new User(Pnumber,Fpass);
+                            dbRef.push().setValue(user, new DatabaseReference.CompletionListener(){
+
+
+                                @Override
+                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+
+                                    dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                boolean exists=false;
+
+                                            for(DataSnapshot  child : dataSnapshot.getChildren()){
+                                                Map<String, Object> model = (Map<String, Object>) child.getValue();
+                                                if(model.get("phoneNumber").equals(etPhone.getText().toString().trim())) {
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }
+
+
+                                            if(exists) {
+                                                etPhone.requestFocus();
+                                                etPhone.setError("Phonenumber has already been registered.");
+                                            }
+                                            else {
+                                                progressDialog.setMessage("Registering User..");
+                                                progressDialog.show();
+                                                progressDialog.dismiss();
+                                                messageBox("User Registered");
+                                                Intent intent = new Intent(Registration.this,LoginDraft2.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+                            });
+                        }else{
+                            etPhone.requestFocus();
+                            etPhone.setError("Invalid Phone Numbers");
+                        }
+                }else{
+                    etPhone.requestFocus();
+                    etPhone.setError("Invalid Phone Number");
+                }
+
         }else{
             etPass1.setError("Password not matched!");
             etpass2.setError("Password not matched!");
@@ -131,4 +173,18 @@ public class Registration extends AppCompatActivity implements View.OnClickListe
             RegUser();
         }
     }
+
+    public String getAreaPhoneCode(String s){
+        String check;
+
+        char one=s.charAt(0);
+        char two=s.charAt(1);
+        char three=s.charAt(2);
+        char four=s.charAt(3);
+        check=one+""+two+""+three+""+four+"";
+
+        return check;
+    }
+
+
 }
