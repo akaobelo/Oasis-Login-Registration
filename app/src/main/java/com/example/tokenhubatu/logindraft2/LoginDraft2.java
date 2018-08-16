@@ -80,10 +80,10 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                         if(exists) {
                           messageBox("found");
 
+
                         }
                         else {
-                            txtPassword.setError("Not found!");
-                            txtPhone.setError("Not found!");
+                            messageBox("Invalid Phone number/Password");
                         }
                     }
 

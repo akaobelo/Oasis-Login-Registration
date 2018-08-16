@@ -78,9 +78,9 @@ public class Registration extends AppCompatActivity implements View.OnClickListe
     }
 
     private void RegUser(){
-        String Pnumber = etPhone.getText().toString().trim();
-        String confirmPass = etpass2.getText().toString().trim();
-        String Fpass= etPass1.getText().toString().trim();
+        final String Pnumber = etPhone.getText().toString().trim();
+       final  String confirmPass = etpass2.getText().toString().trim();
+      final   String Fpass= etPass1.getText().toString().trim();
         if (TextUtils.isEmpty(Pnumber)){
         etPhone.setError("Cannot be empty!");
 
@@ -101,56 +101,61 @@ public class Registration extends AppCompatActivity implements View.OnClickListe
                     Log.d("number checking",getAreaPhoneCode(Pnumber));
                         if (getAreaPhoneCode(Pnumber).equals("+639")){
 
+                            dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    boolean exists=false;
+
+                                    for(DataSnapshot  child : dataSnapshot.getChildren()){
+                                        Log.d("PhoneNumber:",etPhone.getText().toString().trim());
+                                        Map<String, Object> model = (Map<String, Object>) child.getValue();
+                                        if(model.get("phoneNumber").equals(etPhone.getText().toString().trim())) {
+                                            exists = true;
+                                            break;
+                                        }
+                                    }
 
 
-                            User user= new User(Pnumber,Fpass);
-                            dbRef.push().setValue(user, new DatabaseReference.CompletionListener(){
+                                    if(exists) {
+                                        etPhone.requestFocus();
+                                        etPhone.setError("Phonenumber has already been registered.");
+                                    }
+                                    else {
+                                        User user= new User(Pnumber,Fpass);
+                                        dbRef.push().setValue(user, new DatabaseReference.CompletionListener(){
 
+
+                                            @Override
+                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+
+
+                                            }
+
+
+                                        });
+                                        progressDialog.setMessage("Registering User..");
+                                        progressDialog.show();
+                                        progressDialog.dismiss();
+                                        messageBox("User Registered");
+                                        Intent intent = new Intent(Registration.this,LoginDraft2.class);
+                                        startActivity(intent);
+                                        finish();
+                                }
+
+                           }
 
                                 @Override
-                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-
-                                    dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                boolean exists=false;
-
-                                            for(DataSnapshot  child : dataSnapshot.getChildren()){
-                                                Map<String, Object> model = (Map<String, Object>) child.getValue();
-                                                if(model.get("phoneNumber").equals(etPhone.getText().toString().trim())) {
-                                                    exists = true;
-                                                    break;
-                                                }
-                                            }
-
-
-                                            if(exists) {
-                                                etPhone.requestFocus();
-                                                etPhone.setError("Phonenumber has already been registered.");
-                                            }
-                                            else {
-                                                progressDialog.setMessage("Registering User..");
-                                                progressDialog.show();
-                                                progressDialog.dismiss();
-                                                messageBox("User Registered");
-                                                Intent intent = new Intent(Registration.this,LoginDraft2.class);
-                                                startActivity(intent);
-                                                finish();
-                                            }
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
                                 }
+
+
                             });
+
                         }else{
                             etPhone.requestFocus();
-                            etPhone.setError("Invalid Phone Numbers");
+                            etPhone.setError("Invalid Phone Number");
                         }
                 }else{
                     etPhone.requestFocus();

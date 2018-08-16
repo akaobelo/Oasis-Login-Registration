@@ -11,12 +11,12 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="112dp"
+        android:layout_width="152dp"
         android:layout_height="40dp"
         android:layout_marginBottom="70dp"
         android:layout_marginTop="63dp"
         android:fontFamily="sans-serif-light"
-        android:text="@string/username"
+        android:text="@string/phone_number"
         android:textAllCaps="true"
         android:textColor="@color/color"
         android:textSize="20sp"
