@@ -9,7 +9,7 @@
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="394dp"
-        android:layout_height="150dp"
+        android:layout_height="188dp"
         android:layout_marginTop="4dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,14 +23,116 @@
             android:text="@string/otp_details"
             android:textSize="20sp" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <EditText
+                android:id="@+id/txtCode1"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <EditText
+                android:id="@+id/txtCode2"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <EditText
+                android:id="@+id/txtCode3"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <EditText
+                android:id="@+id/txtCode4"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <EditText
+                android:id="@+id/txtCode5"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <EditText
+                android:id="@+id/txtCode6"
+                android:layout_width="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:gravity="center"
+                android:maxLength="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
         <EditText
             android:id="@+id/txtVerificationCode"
-            android:layout_width="249dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30px"
+            android:layout_weight="1"
             android:ems="10"
             android:hint="Verification Code"
-            android:inputType="number" />
+            android:inputType="number"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="135dp" />
 
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

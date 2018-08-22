@@ -135,7 +135,9 @@
             android:layout_height="match_parent"
             android:background="@color/transparent"
             android:text="@string/forgot_password"
-            android:textColor="@color/color" />
+            android:textColor="@color/color"
+            android:id="@+id/btnForgot"
+            />
 
 
     </LinearLayout>

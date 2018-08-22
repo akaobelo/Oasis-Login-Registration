@@ -2,11 +2,16 @@ package com.example.tokenhubatu.logindraft2;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -35,8 +40,10 @@ import java.util.concurrent.TimeUnit;
 
 
 public class LoginDraft2 extends AppCompatActivity implements View.OnClickListener {
-   private Button btn,btnLogin;
+   private Button btn,btnLogin,btnForgotPassword;
    private EditText txtPhone,txtPassword;
+
+   private EditText txtCode1,txtCode2,txtCode3,txtCode4,txtCode5,txtCode6;
 
    private DatabaseReference dbRef;
    private FirebaseAuth mAuth;
@@ -44,6 +51,9 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
    private String verificationID;
    private    EditText txtVerificatioCode;
+    private boolean autoVerify=false;
+
+     private AlertDialog.Builder alert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,30 +62,35 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
          btn =  findViewById(R.id.btnSignup);
          btnLogin= findViewById(R.id.btnLogin);
-
+        btnForgotPassword=findViewById(R.id.btnForgot);
          txtPhone=findViewById(R.id.txtPhone);
          txtPassword=findViewById(R.id.txtPassword);
+
+
 
 
         dbRef= FirebaseDatabase.getInstance().getReference().child("Users");
 
         btn.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
+        btnForgotPassword.setOnClickListener(this);
 
         mAuth=FirebaseAuth.getInstance();
 
         mCallbacks= new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+
                 signInWithPhoneAuthCredential(phoneAuthCredential);
+
             }
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
                     if (e instanceof FirebaseAuthInvalidCredentialsException){
-
+                        messageBox("Invalid Credential");
                     }else if (e instanceof FirebaseTooManyRequestsException){
-
+                        messageBox(e+"");
                     }
             }
 
@@ -135,16 +150,21 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                 token);
     }
 
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential){
+    private void signInWithPhoneAuthCredential(final PhoneAuthCredential credential){
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(LoginDraft2.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()){
 
-                                FirebaseUser user= task.getResult().getUser();
-                                messageBox("Welcome ");
+//                                FirebaseUser user= task.getResult().getUser();
+                               txtVerificatioCode.setText(credential.getSmsCode());
+                               txtVerificatioCode.setEnabled(false);
+                               autoVerify=true;
+                                String OTPcode=credential.getSmsCode()+"";
 
+
+                                getCode(OTPcode);
                             }else{
                                 if (task.getException() instanceof FirebaseAuthInvalidCredentialsException){
                                     txtVerificatioCode.setError("Invalid Code");
@@ -153,21 +173,6 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                     }
                 });
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -212,15 +217,28 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                         }
 
                         if(exists) {
-
+                            startPhoneNumberVerification(txtPhone.getText().toString().trim());
                             LayoutInflater factory= LayoutInflater.from(LoginDraft2.this);
                             final View OTPverification= factory.inflate(R.layout.activity_otp_verification,null);
-                             txtVerificatioCode= OTPverification.findViewById(R.id.txtVerificationCode);
+
+                            txtVerificatioCode= OTPverification.findViewById(R.id.txtVerificationCode);
+
+                            txtCode1=OTPverification.findViewById(R.id.txtCode1);
+                            txtCode2=OTPverification.findViewById(R.id.txtCode2);
+                            txtCode3=OTPverification.findViewById(R.id.txtCode3);
+                            txtCode4=OTPverification.findViewById(R.id.txtCode4);
+                            txtCode5=OTPverification.findViewById(R.id.txtCode5);
+                            txtCode6=OTPverification.findViewById(R.id.txtCode6);
+
+
+                            addEditTextBorder();
+
                             final TextView lblVerificationInfo =OTPverification.findViewById(R.id.lblVerification);
 
                             lblVerificationInfo.setText("Please enter the One-Time Password(OTP) we sent to "+ phoneNum);
 
-                            final AlertDialog.Builder alert=new AlertDialog.Builder(LoginDraft2.this);
+                        alert =new AlertDialog.Builder(LoginDraft2.this);
+
                             alert.setTitle("One-Time Password Verification").setView(OTPverification)
                                     .setPositiveButton("Resend Code", new DialogInterface.OnClickListener() {
                                 @Override
@@ -230,9 +248,13 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                             }).setNegativeButton("Verify Code", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    startPhoneNumberVerification(txtPhone.getText().toString().trim());
+                                                if (autoVerify){
+                                                    dialogInterface.dismiss();
+                                                    messageBox("Welcome");
+                                                }
                                 }
                             });
+
                         alert.show();
 
                         }
@@ -249,11 +271,51 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
                 }
             });
+        }else if(view == btnForgotPassword){
+            signOut();
         }
 
     }
 
     public void messageBox(String s){
         Toast.makeText(this,s,Toast.LENGTH_LONG).show();
+    }
+
+    public void signOut(){
+        mAuth.signOut();
+        messageBox("Logged out");
+    }
+
+    public void addEditTextBorder(){
+        ShapeDrawable shape= new ShapeDrawable(new RectShape());
+        shape.getPaint().setColor(Color.BLACK);
+        shape.getPaint().setStyle(Paint.Style.STROKE);
+        shape.getPaint().setStrokeWidth(3);
+
+        txtCode1.setBackground(shape);
+        txtCode2.setBackground(shape);
+        txtCode3.setBackground(shape);
+        txtCode4.setBackground(shape);
+        txtCode5.setBackground(shape);
+        txtCode6.setBackground(shape);
+    }
+
+
+    public void getCode(String OTPcode){
+        char one=OTPcode.charAt(0);
+        char two=OTPcode.charAt(1);
+        char three=OTPcode.charAt(2);
+        char four=OTPcode.charAt(3);
+        char five=OTPcode.charAt(4);
+        char six=OTPcode.charAt(5);
+
+
+
+        txtCode1.setText(one+"");
+        txtCode2.setText(two+"");
+        txtCode3.setText(three+"");
+        txtCode4.setText(four+"");
+        txtCode5.setText(five+"");
+        txtCode6.setText(six+"");
     }
 }
