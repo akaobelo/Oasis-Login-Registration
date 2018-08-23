@@ -10,8 +10,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -44,6 +47,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
    private EditText txtPhone,txtPassword;
 
    private EditText txtCode1,txtCode2,txtCode3,txtCode4,txtCode5,txtCode6;
+    StringBuilder sb= new StringBuilder();
 
    private DatabaseReference dbRef;
    private FirebaseAuth mAuth;
@@ -51,9 +55,9 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
    private String verificationID;
    private    EditText txtVerificatioCode;
-    private boolean autoVerify=false;
 
      private AlertDialog.Builder alert;
+     private String smsCodeHolder="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,16 +100,15 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
             @Override
             public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-             //   super.onCodeSent(s, forceResendingToken);
 
                 verificationID=s;
+                Log.d("Verification ID",verificationID);
                 mResendToken=forceResendingToken;
             }
         };
 
 
     }
-    //Firebase Authentication
 
 
     @Override
@@ -137,6 +140,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
     private void verifyPhoneNumberWithCode(String verificationId,String code){
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId,code);
+        Log.d("verification",verificationId+" code:"+code);
         signInWithPhoneAuthCredential(credential);
     }
 
@@ -157,17 +161,29 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                     public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()){
 
-//                                FirebaseUser user= task.getResult().getUser();
-                               txtVerificatioCode.setText(credential.getSmsCode());
-                               txtVerificatioCode.setEnabled(false);
-                               autoVerify=true;
-                                String OTPcode=credential.getSmsCode()+"";
+                                FirebaseUser user= task.getResult().getUser();
+
+                                if (credential != null){
+                                    if (credential.getSmsCode() != null){
+                                        txtVerificatioCode.setText(credential.getSmsCode());
+                                        txtVerificatioCode.setEnabled(false);
+
+                                        String OTPcode=credential.getSmsCode()+"";
+                                        smsCodeHolder=credential.getSmsCode().toString();
+
+                                        getCode(OTPcode);
+                                        Log.d("signInAuth","Success inside if");
+                                    }else{
+                                        Log.d("signInAuth","Success inside else");
+                                    }
+                                }
 
 
-                                getCode(OTPcode);
                             }else{
                                 if (task.getException() instanceof FirebaseAuthInvalidCredentialsException){
-                                    txtVerificatioCode.setError("Invalid Code");
+
+                                    messageBox("Invalid Code");
+                                    Log.d("signInAuth","Invalid");
                                 }
                             }
                     }
@@ -176,12 +192,6 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
 
 
-
-    ///////////////////////////
-    ///////////////////////////
-    ///////////////////////////
-    ///////////////////////////
-    //Login
     public void openReg(){
         Intent intent = new Intent(this,Registration.class);
         startActivity(intent);
@@ -231,27 +241,181 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                             txtCode6=OTPverification.findViewById(R.id.txtCode6);
 
 
+                            txtCode1.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    if(sb.length()==1)
+                                    {
+
+                                        sb.deleteCharAt(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    if (sb.length() ==0 & txtCode1.length()==1){
+                                        sb.append(charSequence);
+                                        txtCode1.clearFocus();
+                                        txtCode2.requestFocus();
+                                        txtCode2.setCursorVisible(true);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+                                    if(sb.length()==0)
+                                    {
+
+                                        txtCode1.requestFocus();
+                                    }
+                                }
+                            });
+                            txtCode2.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    if(sb.length()==1)
+                                    {
+
+                                        sb.deleteCharAt(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    if (sb.length() ==0 & txtCode1.length()==1){
+                                        sb.append(charSequence);
+                                        txtCode2.clearFocus();
+                                        txtCode3.requestFocus();
+                                        txtCode3.setCursorVisible(true);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+                                    if(sb.length()==0)
+                                    {
+
+                                        txtCode2.requestFocus();
+                                    }
+                                }
+                            });
+                            txtCode3.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    if(sb.length()==1)
+                                    {
+
+                                        sb.deleteCharAt(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    if (sb.length() ==0 & txtCode1.length()==1){
+                                        sb.append(charSequence);
+                                        txtCode3.clearFocus();
+                                        txtCode4.requestFocus();
+                                        txtCode4.setCursorVisible(true);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+                                    if(sb.length()==0)
+                                    {
+
+                                        txtCode3.requestFocus();
+                                    }
+                                }
+                            });
+                            txtCode4.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    if(sb.length()==1)
+                                    {
+
+                                        sb.deleteCharAt(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    if (sb.length() ==0 & txtCode1.length()==1){
+                                        sb.append(charSequence);
+                                        txtCode4.clearFocus();
+                                        txtCode5.requestFocus();
+                                        txtCode5.setCursorVisible(true);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+                                    if(sb.length()==0)
+                                    {
+
+                                        txtCode4.requestFocus();
+                                    }
+                                }
+                            });
+                            txtCode5.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    if(sb.length()==1)
+                                    {
+
+                                        sb.deleteCharAt(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    if (sb.length() ==0 & txtCode1.length()==1){
+                                        sb.append(charSequence);
+                                        txtCode5.clearFocus();
+                                        txtCode6.requestFocus();
+                                        txtCode6.setCursorVisible(true);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+                                    if(sb.length()==0)
+                                    {
+
+                                        txtCode5.requestFocus();
+                                    }
+                                }
+                            });
+
                             addEditTextBorder();
 
                             final TextView lblVerificationInfo =OTPverification.findViewById(R.id.lblVerification);
 
                             lblVerificationInfo.setText("Please enter the One-Time Password(OTP) we sent to "+ phoneNum);
 
-                        alert =new AlertDialog.Builder(LoginDraft2.this);
+                            alert =new AlertDialog.Builder(LoginDraft2.this);
 
                             alert.setTitle("One-Time Password Verification").setView(OTPverification)
-                                    .setPositiveButton("Resend Code", new DialogInterface.OnClickListener() {
+                                    .setNeutralButton("Resend Code", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                 }
-                            }).setNegativeButton("Verify Code", new DialogInterface.OnClickListener() {
+                            }).setNeutralButton("Verify Code", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                if (autoVerify){
-                                                    dialogInterface.dismiss();
-                                                    messageBox("Welcome");
-                                                }
+                                    String code = smsCodeHolder;
+                                    verifyPhoneNumberWithCode(verificationID,code);
                                 }
                             });
 
@@ -318,4 +482,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
         txtCode5.setText(five+"");
         txtCode6.setText(six+"");
     }
-}
+
+
+    }
+
