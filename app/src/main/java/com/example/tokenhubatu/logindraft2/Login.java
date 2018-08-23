@@ -14,7 +14,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -25,7 +24,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -42,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
-public class LoginDraft2 extends AppCompatActivity implements View.OnClickListener {
+public class Login extends AppCompatActivity implements View.OnClickListener {
    private Button btn,btnLogin,btnForgotPassword;
    private EditText txtPhone,txtPassword;
 
@@ -54,7 +52,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
    private PhoneAuthProvider.ForceResendingToken mResendToken;
    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
    private String verificationID;
-   private    EditText txtVerificatioCode;
+   private EditText txtVerificatioCode;
 
      private AlertDialog.Builder alert;
      private String smsCodeHolder="";
@@ -62,7 +60,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login_draft2);
+        setContentView(R.layout.activity_login);
 
          btn =  findViewById(R.id.btnSignup);
          btnLogin= findViewById(R.id.btnLogin);
@@ -84,18 +82,18 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
         mCallbacks= new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-
-                signInWithPhoneAuthCredential(phoneAuthCredential);
+                Log.d("OTP verification","DONE");
+//                signInWithPhoneAuthCredential(phoneAuthCredential);
 
             }
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
-                    if (e instanceof FirebaseAuthInvalidCredentialsException){
-                        messageBox("Invalid Credential");
-                    }else if (e instanceof FirebaseTooManyRequestsException){
-                        messageBox(e+"");
-                    }
+//                    if (e instanceof FirebaseAuthInvalidCredentialsException){
+//                        messageBox("Invalid Credential");
+//                    }else if (e instanceof FirebaseTooManyRequestsException){
+//                        messageBox(e+"");
+//                    }
             }
 
             @Override
@@ -133,7 +131,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                     phoneNumber,
                     60,
                     TimeUnit.SECONDS,
-                    LoginDraft2.this,
+                    Login.this,
                     mCallbacks
             );
     }
@@ -141,7 +139,22 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
     private void verifyPhoneNumberWithCode(String verificationId,String code){
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId,code);
         Log.d("verification",verificationId+" code:"+code);
+        if (credential != null){
+            if (credential.getSmsCode() != null){
+                txtVerificatioCode.setText(credential.getSmsCode());
+                txtVerificatioCode.setEnabled(false);
+
+                String OTPcode=credential.getSmsCode()+"";
+                smsCodeHolder=credential.getSmsCode().toString();
+
+                getCode(OTPcode);
+                Log.d("signInAuth","Success inside if");
+            }else{
+                Log.d("signInAuth","Success inside else");
+            }
+        }
         signInWithPhoneAuthCredential(credential);
+
     }
 
     private void resendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token){
@@ -149,37 +162,38 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                 phoneNumber,
                 60,
                 TimeUnit.SECONDS,
-                LoginDraft2.this,
+                Login.this,
                 mCallbacks,
                 token);
     }
 
     private void signInWithPhoneAuthCredential(final PhoneAuthCredential credential){
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(LoginDraft2.this, new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()){
 
                                 FirebaseUser user= task.getResult().getUser();
 
-                                if (credential != null){
-                                    if (credential.getSmsCode() != null){
-                                        txtVerificatioCode.setText(credential.getSmsCode());
-                                        txtVerificatioCode.setEnabled(false);
-
-                                        String OTPcode=credential.getSmsCode()+"";
-                                        smsCodeHolder=credential.getSmsCode().toString();
-
-                                        getCode(OTPcode);
-                                        Log.d("signInAuth","Success inside if");
-                                    }else{
-                                        Log.d("signInAuth","Success inside else");
-                                    }
-                                }
-
+//                                if (credential != null){
+//                                    if (credential.getSmsCode() != null){
+//                                        txtVerificatioCode.setText(credential.getSmsCode());
+//                                        txtVerificatioCode.setEnabled(false);
+//
+//                                        String OTPcode=credential.getSmsCode()+"";
+//                                        smsCodeHolder=credential.getSmsCode().toString();
+//
+//                                        getCode(OTPcode);
+//                                        Log.d("signInAuth","Success inside if");
+//                                    }else{
+//                                        Log.d("signInAuth","Success inside else");
+//                                    }
+//                                }
+                                Log.d("OTP verification","DONE1");
 
                             }else{
+                                Log.d("signInAuth",""+task.getException() );
                                 if (task.getException() instanceof FirebaseAuthInvalidCredentialsException){
 
                                     messageBox("Invalid Code");
@@ -228,7 +242,8 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
                         if(exists) {
                             startPhoneNumberVerification(txtPhone.getText().toString().trim());
-                            LayoutInflater factory= LayoutInflater.from(LoginDraft2.this);
+                            LayoutInflater factory= LayoutInflater.from(Login.this);
+
                             final View OTPverification= factory.inflate(R.layout.activity_otp_verification,null);
 
                             txtVerificatioCode= OTPverification.findViewById(R.id.txtVerificationCode);
@@ -399,11 +414,11 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
 
                             addEditTextBorder();
 
-                            final TextView lblVerificationInfo =OTPverification.findViewById(R.id.lblVerification);
+                            final TextView lblVerificationInfo = OTPverification.findViewById(R.id.lblVerification);
 
                             lblVerificationInfo.setText("Please enter the One-Time Password(OTP) we sent to "+ phoneNum);
 
-                            alert =new AlertDialog.Builder(LoginDraft2.this);
+                            alert =new AlertDialog.Builder(Login.this);
 
                             alert.setTitle("One-Time Password Verification").setView(OTPverification)
                                     .setNeutralButton("Resend Code", new DialogInterface.OnClickListener() {
@@ -415,6 +430,7 @@ public class LoginDraft2 extends AppCompatActivity implements View.OnClickListen
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     String code = smsCodeHolder;
+                                    Log.d("OTP:",code);
                                     verifyPhoneNumberWithCode(verificationID,code);
                                 }
                             });
